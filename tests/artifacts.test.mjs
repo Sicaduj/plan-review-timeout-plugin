@@ -11,9 +11,13 @@ const host = read('lib/index.js')
 const hostRemote = read('lib/typert.host.js')
 
 describe('standalone bundle artifacts', () => {
-  it('declares the private package, real bundle patch, display resources, and built exports', () => {
+  it('declares the market-eligible package, real bundle patch, display resources, and built exports', () => {
     assert.equal(manifest.name, '@deepseek-ai/dsh-experimental-plan-review-timeout')
-    assert.equal(manifest.private, true)
+    assert.notEqual(manifest.private, true)
+    assert.equal(manifest.engines.dsh, '*')
+    assert.equal(manifest.repository.url, 'git+https://github.com/Sicaduj/plan-review-timeout-plugin.git')
+    assert.ok(manifest.homepage.startsWith('https://'))
+    assert.ok(manifest.keywords.includes('exit-plan-mode'))
     assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
     assert.equal(manifest.dsh.client.platform, 'web')
     assert.equal(manifest.exports['./icon'], './icon.svg')

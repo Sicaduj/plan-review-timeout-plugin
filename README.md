@@ -41,6 +41,16 @@ pnpm test
 
 No installation, profile edit, or runtime configuration change is performed by these commands. Installation and live browser verification are separate integration steps performed by the integrator.
 
+## Install through Discover (plugin market)
+
+The package declares `dsh.bundle`, is not private, and accepts every DSH version through `engines.dsh: "*"`, so the DSH plugin market generator (`@deepseek-ai/dsh-plugin-market-generator`) lists its Git source in a market index:
+
+1. Tag releases as `vX.Y.Z` (a `v1.0.0` tag lists version 1.0.0); the default-branch commit lists the manifest's current version too.
+2. Generate an index from a source list containing this repository URL with `@deepseek-ai/dsh-plugin-market-generator`, and publish the `index.json` over https.
+3. Add that index URL as an index source in DSH's Discover page; the entry installs the bundle from the pinned Git commit through guided plugin installation.
+
+The index and detail reads use the reader's Git credential configuration for this private repository, so installation and long-description pages need a machine that can already clone it.
+
 Two build-environment notes:
 
 - `pnpm-workspace.yaml` pins `rolldown` to `1.1.1`, the version the checkout's own toolchain resolves for tsdown.
