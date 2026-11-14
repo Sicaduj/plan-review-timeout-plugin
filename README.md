@@ -51,6 +51,14 @@ The package declares `dsh.bundle`, is not private, and accepts every DSH version
 
 The index and detail reads use the reader's Git credential configuration for this private repository, so installation and long-description pages need a machine that can already clone it.
 
+The published market index for this bundle is a secret GitHub gist (unlisted, fetched without credentials):
+
+```text
+https://gist.githubusercontent.com/Sicaduj/ab306b08059ad421d74270f7dece403d/raw/index.json
+```
+
+To publish a new version: tag `vX.Y.Z`, push the tag, re-run the market generator over `plugins.txt` containing this repository URL, and replace the gist's `index.json` with `gh gist edit ab306b08059ad421d74270f7dece403d index.json`. The Discover index source URL stays the same.
+
 Two build-environment notes:
 
 - `pnpm-workspace.yaml` pins `rolldown` to `1.1.1`, the version the checkout's own toolchain resolves for tsdown.
