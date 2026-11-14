@@ -1,4 +1,4 @@
-/** Client lifecycle for the generated Remote namespace and Plugins card. */
+/** Client lifecycle for the generated Remote namespace and the two settings surfaces. */
 import type { Context } from '@deepseek-ai/cordis';
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol';
 /** Services required before the generated namespace can mount. */

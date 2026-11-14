@@ -6,6 +6,7 @@ export const NS = 'planReviewTimeout'
 /** English copy and key source. */
 export const en = {
   title: 'Plan review timeout',
+  nav: 'Plan review',
   description: 'Choose how long the plan review from exit_plan_mode stays open waiting for your decision. Default: 120,000 ms (2 minutes).',
   fieldLabel: 'Plan review timeout (milliseconds)',
   defaultLabel: 'Default: 120,000 ms (2 minutes)',
@@ -34,6 +35,7 @@ export type PlanReviewTimeoutLocaleKey = keyof typeof en
 /** Simplified Chinese copy. */
 export const zh: Record<PlanReviewTimeoutLocaleKey, string> = {
   title: '计划审查超时',
+  nav: '计划审查',
   description: '设置 exit_plan_mode 的计划审查等待用户决定的时长。默认值：120,000 毫秒（2 分钟）。',
   fieldLabel: '计划审查超时（毫秒）',
   defaultLabel: '默认值：120,000 毫秒（2 分钟）',

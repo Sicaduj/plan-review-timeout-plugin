@@ -1,12 +1,12 @@
 # Plan review timeout plugin
 
-A private, standalone Host + Client bundle for DeepSeek Harness. It adds a **Plan review timeout** card to the Plugins settings page that controls how long the `exit_plan_mode` plan review stays open waiting for the user's decision.
+A private, standalone Host + Client bundle for DeepSeek Harness. It adds a **Plan review** entry to the Settings options menu (after Models and Agent presets) and a matching card on the Plugins settings page; both edit how long the `exit_plan_mode` plan review stays open waiting for the user's decision.
 
 ## Behavior
 
 `exit_plan_mode` presents the completed plan and blocks for the user's approve/keep-planning decision. This plugin bounds that review wait with a configurable duration. When the wait expires before a decision, the review settles exactly like a dismissed review: the plan is **not** approved, the review closes, the turn ends, and plan mode stays active. The model receives plan-mode's standard dismissal sentence, so it does not re-present the plan in a loop. A review already under way keeps the duration that was configured when it started; saved changes apply to the next review.
 
-The duration is deployment configuration on this plugin's own Loader entry (`plan-review-timeout`), read and written through the Plugins settings card with `configEditor.edit`. Saving changes only `timeoutMs` and preserves the entry's other configuration fields. The card reports loading, saving, validation, success, and failure states. If the edit commits but the fresh confirmation read fails, the result preserves the accepted value as **committed but unconfirmed** and requires an explicit refresh before another write. Gateway, cancellation, and unknown transport outcomes are also held for refresh rather than reported as definite save failures; only known business failures may be retried immediately. Overlapping reads are generation-gated so stale success or failure cannot replace a newer result.
+The primary way to change the duration is the Settings panel: **Settings → Plan review** opens the same staged editor as the Plugins card, so no plugin round trip is needed. The duration is deployment configuration on this plugin's own Loader entry (`plan-review-timeout`), read and written through `configEditor.edit`. Saving changes only `timeoutMs` and preserves the entry's other configuration fields. The card reports loading, saving, validation, success, and failure states. If the edit commits but the fresh confirmation read fails, the result preserves the accepted value as **committed but unconfirmed** and requires an explicit refresh before another write. Gateway, cancellation, and unknown transport outcomes are also held for refresh rather than reported as definite save failures; only known business failures may be retried immediately. Overlapping reads are generation-gated so stale success or failure cannot replace a newer result.
 
 ### Duration bounds
 
@@ -21,7 +21,7 @@ The settings input accepts whole millisecond values within those bounds only. Tw
 - `src/index.ts`: Typert Remote Host service, `tools/execute` deadline wrapper for `exit_plan_mode`, and configuration read/write.
 - `src/timeout.ts`: shared duration bounds and draft parsing.
 - `src/types.ts`: wire values shared by the Host Remote methods and the browser client.
-- `src/client/`: generated-Remote mount, staged controller, accessible card with range/behavior tooltips, styles, and English/Chinese dictionaries.
+- `src/client/`: generated-Remote mount, staged controller, the shared staged editor, the Plugins card, the Settings section and its navigation icon, styles, and English/Chinese dictionaries.
 - `lib/`: built Host and browser artifacts plus generated `/typert` and `/remote` contributions.
 - `cordis.patch.yml`: Loader insertion for the bundle, with the 120,000 ms default.
 - `locale/en.json`, `locale/zh.json`, and `icon.svg`: Plugin Manager display metadata and original artwork.
