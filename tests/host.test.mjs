@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { afterEach, describe, it } from 'node:test'
 import { Context } from '@deepseek-ai/cordis'
-import PlanReviewTimeoutController from '../lib/index.js'
+import { apply, PlanReviewTimeoutController } from '../lib/index.js'
 
 const contexts = []
 afterEach(async () => { await Promise.all(contexts.splice(0).map(ctx => ctx.fiber.dispose())) })
@@ -209,29 +207,34 @@ function ctx_dispatch(b, exec, next) {
   return b.ctx.waterfall('tools/execute', exec, next)
 }
 
-describe('typert-protocol cordis-root patch', () => {
-  it('resolves the installed dependency through the symbol root key, not ctx.root', () => {
-    const require = createRequire(import.meta.url)
-    const source = readFileSync(require.resolve('@deepseek-ai/dsh-typert-protocol'), 'utf8')
-    assert.ok(source.includes('Symbol.for("cordis.root")') || source.includes("Symbol.for('cordis.root')"),
-      'installed dsh-typert-protocol lost the cordis-root patch; re-run pnpm install')
-    assert.ok(!source.includes('ctx.root.reflect'),
-      'installed dsh-typert-protocol dereferences ctx.root again; re-run pnpm install')
-  })
-
-  it('registers the invocation accessor through the symbol root key when one is present', () => {
+describe('Cordis root compatibility', () => {
+  function pluginContext() {
     const ctx = new Context()
     contexts.push(ctx)
     ctx.provide('configEditor', { entries: () => [], configuration: () => [] })
     ctx.provide('tools', { register: () => () => {} })
-    const registered = []
-    const symbolRoot = {
-      reflect: { props: {} },
-      accessor: (name) => { registered.push(name) },
-    }
-    Object.defineProperty(ctx, Symbol.for('cordis.root'), { value: symbolRoot, configurable: true })
-    const controller = new PlanReviewTimeoutController(ctx, { timeoutMs: 120000 })
-    assert.ok(controller instanceof PlanReviewTimeoutController)
-    assert.deepEqual(registered, ['invocation'])
+    return ctx
+  }
+
+  it('defines the root property from the Cordis symbol when the string property is absent', () => {
+    const ctx = pluginContext()
+    const root = ctx
+    // Mirror checkout Cordis: root is reachable only through the symbol key,
+    // which is what makes published dsh-typert-protocol throw on ctx.root.
+    Object.defineProperty(ctx, Symbol.for('cordis.root'), { value: root, configurable: true })
+    assert.equal(delete ctx.root, true)
+    assert.equal(Object.hasOwn(ctx, 'root'), false)
+    assert.doesNotThrow(() => { apply(ctx, { timeoutMs: 120000 }) })
+    assert.equal(Object.hasOwn(ctx, 'root'), true)
+    assert.equal(ctx.root, root)
+    assert.ok(Reflect.get(ctx, 'planReviewTimeout'))
+  })
+
+  it('leaves an existing root property untouched on Cordis versions that still expose it', () => {
+    const ctx = pluginContext()
+    const existing = ctx.root
+    apply(ctx, { timeoutMs: 120000 })
+    assert.equal(ctx.root, existing)
+    assert.ok(Reflect.get(ctx, 'planReviewTimeout'))
   })
 })

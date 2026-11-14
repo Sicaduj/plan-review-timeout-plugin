@@ -33,13 +33,6 @@ describe('standalone bundle artifacts', () => {
     }
   })
 
-  it('keeps the cordis-root dependency patch wired through pnpm', () => {
-    assert.ok(statSync(join(root, 'patches', '@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch')).isFile())
-    const workspace = read('pnpm-workspace.yaml')
-    assert.ok(workspace.includes('patchedDependencies'))
-    assert.ok(workspace.includes('patches/@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch'))
-  })
-
   it('inserts only the intended Host+Client package row with its default timeout', () => {
     assert.equal(read('cordis.patch.yml'),
       "- insert:\n    - id: plan-review-timeout\n      name: '@deepseek-ai/dsh-experimental-plan-review-timeout'\n      config:\n        timeoutMs: 120000\n")
@@ -107,6 +100,14 @@ describe('standalone bundle artifacts', () => {
     assert.ok(client.includes('Refresh before another write.'))
     assert.ok(client.includes('minTimeoutMs'))
     assert.ok(client.includes('maxTimeoutMs'))
+  })
+
+  it('ships the namespace plugin form so apply runs before the Remote service', () => {
+    assert.ok(host.includes('export { Config,'))
+    assert.ok(!host.includes('as default'))
+    assert.ok(host.includes('apply'))
+    assert.ok(host.includes('inject'))
+    assert.ok(host.includes('installRootCompatibility') || host.includes('Object.hasOwn(ctx, "root")'))
   })
 
   it('ships the plan-review deadline wrapper and its dismissal outcome', () => {
