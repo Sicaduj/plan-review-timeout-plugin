@@ -33,6 +33,13 @@ describe('standalone bundle artifacts', () => {
     }
   })
 
+  it('keeps the cordis-root dependency patch wired through pnpm', () => {
+    assert.ok(statSync(join(root, 'patches', '@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch')).isFile())
+    const workspace = read('pnpm-workspace.yaml')
+    assert.ok(workspace.includes('patchedDependencies'))
+    assert.ok(workspace.includes('patches/@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch'))
+  })
+
   it('inserts only the intended Host+Client package row with its default timeout', () => {
     assert.equal(read('cordis.patch.yml'),
       "- insert:\n    - id: plan-review-timeout\n      name: '@deepseek-ai/dsh-experimental-plan-review-timeout'\n      config:\n        timeoutMs: 120000\n")

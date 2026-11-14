@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-experimental-plan-review-timeout",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Configurable exit_plan_mode plan-review timeout for the Plugins settings page",
   "type": "module",
   "author": "Sicaduj",
