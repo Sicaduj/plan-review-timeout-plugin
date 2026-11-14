@@ -1,16 +1,23 @@
-/** Client lifecycle for the generated Remote namespace and Plugins card. */
+/** Client lifecycle for the generated Remote namespace and the two settings surfaces. */
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-plugin-manager/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
+// Type-only: pulls the settings domain's SlotMap merge (the 'settings.section' entries).
+import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
 import { PlanReviewTimeoutCard } from './PlanReviewTimeoutCard.tsx'
+import { PlanReviewTimeoutSection } from './PlanReviewTimeoutSection.tsx'
+import { PlanReviewTimeoutSectionIcon } from './PlanReviewTimeoutSectionIcon.tsx'
 import { PlanReviewTimeoutController } from './controller.ts'
 import { en, NS, zh } from './locales.ts'
 
 /** Services required before the generated namespace can mount. */
 export const inject = ['remote', 'slots', 'locale']
+
+/** Settings navigation position: after Models and Agent presets. */
+const SETTINGS_ORDER = 25
 
 function registerUi(ctx: Context): void {
   const controller = new PlanReviewTimeoutController(ctx.remote.planReviewTimeout)
@@ -25,6 +32,19 @@ function registerUi(ctx: Context): void {
     locale: NS,
     inject: () => controller.inject(),
   }, PlanReviewTimeoutCard))
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'plan-review-timeout',
+    order: SETTINGS_ORDER,
+    label: () => t('nav'),
+    locale: NS,
+    inject: () => controller.inject(),
+  }, PlanReviewTimeoutSection))
+  ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
+    name: 'settings.section.icon',
+    id: 'plan-review-timeout',
+    label: () => t('title'),
+  }, PlanReviewTimeoutSectionIcon))
   void controller.load()
 }
 

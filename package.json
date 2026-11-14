@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-experimental-plan-review-timeout",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Configurable exit_plan_mode plan-review timeout for the Plugins settings page",
   "type": "module",
   "author": "Sicaduj",
@@ -70,7 +70,8 @@
       "inject": [
         "@deepseek-ai/dsh-api-remotes",
         "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-plugin-manager"
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-client-ui-settings"
       ]
     }
   },
@@ -92,6 +93,7 @@
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.6-alpha.1",
     "@deepseek-ai/dsh-client-store": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-ui-settings": "0.2.2-alpha.2",
     "@deepseek-ai/dsh-config-editor": "0.2.2-alpha.2",
     "@deepseek-ai/dsh-tools": "0.2.2-alpha.2",
     "@types/node": "22.20.1",

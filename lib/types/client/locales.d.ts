@@ -4,6 +4,7 @@ export declare const NS = "planReviewTimeout";
 /** English copy and key source. */
 export declare const en: {
     title: string;
+    nav: string;
     description: string;
     fieldLabel: string;
     defaultLabel: string;

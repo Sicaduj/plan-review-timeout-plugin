@@ -6,6 +6,34 @@
   color: var(--dsw-alias-label-primary);
 }
 
+.panel {
+  display: grid;
+  gap: 12px;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+  padding: 24px 28px 32px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.sectionDescription {
+  margin: 0;
+  max-width: 560px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .fieldHeader,
 .defaultRow,
 .footer {

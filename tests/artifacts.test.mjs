@@ -102,6 +102,18 @@ describe('standalone bundle artifacts', () => {
     assert.ok(client.includes('maxTimeoutMs'))
   })
 
+  it('registers a first-class settings-options entry beside the Plugins card', () => {
+    assert.ok(client.includes('settings.section'))
+    assert.ok(client.includes('settings.section.icon'))
+    assert.ok(client.includes('PlanReviewTimeoutSection'))
+    assert.ok(client.includes('PlanReviewTimeoutSectionIcon'))
+    assert.ok(client.includes('PlanReviewTimeoutPanel'))
+    assert.ok(client.includes('nav:`Plan review`') || client.includes('nav:"Plan review"'))
+    assert.ok(client.includes('viewBox:'))
+    const registrations = [...client.matchAll(/id:`plan-review-timeout`/g)].length + [...client.matchAll(/id:"plan-review-timeout"/g)].length
+    assert.ok(registrations >= 2, 'section id must be shared by the composition and its icon')
+  })
+
   it('ships the namespace plugin form so apply runs before the Remote service', () => {
     assert.ok(host.includes('export { Config,'))
     assert.ok(!host.includes('as default'))
