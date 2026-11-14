@@ -1,0 +1,22 @@
+{
+  "extends": "../deepseek-harness/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "tsBuildInfoFile": "lib/tsconfig.host.tsbuildinfo"
+  },
+  "files": [
+    "src/index.ts",
+    "src/timeout.ts",
+    "src/types.ts"
+  ],
+  "references": [
+    { "path": "../deepseek-harness/vendor/cordis" },
+    { "path": "../deepseek-harness/vendor/schemastery" },
+    { "path": "../deepseek-harness/packages/core/agent" },
+    { "path": "../deepseek-harness/packages/core/tools" },
+    { "path": "../deepseek-harness/packages/util/timeout" },
+    { "path": "../deepseek-harness/packages/boot/config-editor" },
+    { "path": "../deepseek-harness/packages/typert/protocol" }
+  ]
+}

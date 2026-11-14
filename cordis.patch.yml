@@ -1,0 +1,5 @@
+- insert:
+    - id: plan-review-timeout
+      name: '@deepseek-ai/dsh-experimental-plan-review-timeout'
+      config:
+        timeoutMs: 120000

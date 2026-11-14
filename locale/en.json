@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Plan review timeout",
+    "description": "Change how long the exit_plan_mode plan review waits for your decision, with disclosed minimum and maximum durations."
+  }
+}
