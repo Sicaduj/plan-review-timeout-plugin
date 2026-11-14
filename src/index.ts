@@ -7,6 +7,11 @@
  * duration is deployment configuration, read and written through the Plugins
  * settings card and this plugin's own Loader entry.
  *
+ * The plugin exports the namespace form (`name` / `inject` / `Config` /
+ * `apply`) so `apply` can install the Cordis root compatibility property
+ * before the Remote service constructs; a default export would collapse that
+ * namespace and drop the declared injections.
+ *
  * @module @deepseek-ai/dsh-experimental-plan-review-timeout
  */
 
@@ -38,33 +43,21 @@ const PACKAGE_NAME = '@deepseek-ai/dsh-experimental-plan-review-timeout'
 /** The plan-review tool whose review wait this plugin bounds. */
 const EXIT_PLAN_MODE = 'exit_plan_mode'
 
+/** Cordis root-context symbol, shared across module copies by the global symbol registry. */
+const CORDIS_ROOT = Symbol.for('cordis.root')
+
 /**
- * Deadline classification code owned by this plugin, used both as the
- * internal {@link deadline} code and on nothing model-facing. Scoping
- * {@link timeoutOf} to it keeps a nested outer deadline from being misread as
- * this plugin's own expiry.
+ * Deadline classification code owned by this plugin. Scoping {@link timeoutOf}
+ * to it keeps a nested outer deadline from being misread as this plugin's own
+ * expiry.
  */
 export const PLAN_REVIEW_TIMEOUT = 'PLAN_REVIEW_TIMEOUT'
 
 /** Cordis plugin name used by loader diagnostics. */
 export const name = 'plan-review-timeout'
 
-/** Model-facing text replacing the plan-review call when its wait expires. */
-function timedOutContent(timeoutMs: number): { type: 'text'; text: string }[] {
-  return [{
-    type: 'text',
-    text: 'The user dismissed the plan review to reply in their own words; plan mode remains active. '
-      + `The review wait expired after ${timeoutMs}ms without a decision, so the plan was not approved. `
-      + 'Do not present the plan again until the user asks; end your response.',
-  }]
-}
-
-declare module '@deepseek-ai/cordis' {
-  interface Context {
-    /** Configurable `exit_plan_mode` plan-review timeout, shared by the settings card and the enforcement wrapper. */
-    planReviewTimeout: PlanReviewTimeoutController
-  }
-}
+/** The Cordis services this plugin reads. */
+export const inject = ['configEditor', 'tools', 'typert']
 
 /** Validated Loader configuration of this plugin. */
 export interface Config {
@@ -77,14 +70,50 @@ export const Config: z<Config> = z.object({
     .default(DEFAULT_PLAN_REVIEW_TIMEOUT_MS),
 })
 
+/** Model-facing text replacing the plan-review call when its wait expires. */
+function timedOutContent(timeoutMs: number): { type: 'text'; text: string }[] {
+  return [{
+    type: 'text',
+    text: 'The user dismissed the plan review to reply in their own words; plan mode remains active. '
+      + `The review wait expired after ${timeoutMs}ms without a decision, so the plan was not approved. `
+      + 'Do not present the plan again until the user asks; end your response.',
+  }]
+}
+
+/**
+ * Expose the root context as a `root` property before any Remote service
+ * constructs. Published `@deepseek-ai/dsh-typert-protocol` reads the string
+ * property `ctx.root` while binding a service; Cordis versions that replaced
+ * it with the {@link CORDIS_ROOT} symbol would otherwise throw
+ * `cannot get property "root" without inject`. Versions that still expose the
+ * string property already have it, so nothing is defined there.
+ *
+ * @param ctx - the plugin's own Cordis context.
+ */
+function installRootCompatibility(ctx: Context): void {
+  if (Object.hasOwn(ctx, 'root')) return
+  const root = Reflect.get(ctx, CORDIS_ROOT) as Context | undefined
+  Object.defineProperty(ctx, 'root', { value: root ?? ctx, configurable: true })
+}
+
+/** Register the settings service and the plan-review deadline wrapper. */
+export function apply(ctx: Context, config: Config): void {
+  installRootCompatibility(ctx)
+  new PlanReviewTimeoutController(ctx, config)
+}
+
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    /** Configurable `exit_plan_mode` plan-review timeout, shared by the settings card and the enforcement wrapper. */
+    planReviewTimeout: PlanReviewTimeoutController
+  }
+}
+
 /**
  * Bound the plan-review wait and serve the settings card's read and write
  * operations on this plugin's own configuration row.
  */
-export default class PlanReviewTimeoutController extends TypertRemoteService {
-  static inject = ['configEditor', 'tools', 'typert']
-  static Config = Config
-
+export class PlanReviewTimeoutController extends TypertRemoteService {
   constructor(ctx: Context, private readonly config: Config) {
     super(ctx, 'planReviewTimeout', { namespace: 'planReviewTimeout' })
     ctx.effect(

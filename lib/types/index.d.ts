@@ -7,6 +7,11 @@
  * duration is deployment configuration, read and written through the Plugins
  * settings card and this plugin's own Loader entry.
  *
+ * The plugin exports the namespace form (`name` / `inject` / `Config` /
+ * `apply`) so `apply` can install the Cordis root compatibility property
+ * before the Remote service constructs; a default export would collapse that
+ * namespace and drop the declared injections.
+ *
  * @module @deepseek-ai/dsh-experimental-plan-review-timeout
  */
 import type { Context } from '@deepseek-ai/cordis';
@@ -16,34 +21,35 @@ import type { SetPlanReviewTimeoutRequest, PlanReviewTimeoutSnapshot } from './t
 export type * from './types.ts';
 export { DEFAULT_PLAN_REVIEW_TIMEOUT_MS, MAX_PLAN_REVIEW_TIMEOUT_MS, MIN_PLAN_REVIEW_TIMEOUT_MS, } from './timeout.ts';
 /**
- * Deadline classification code owned by this plugin, used both as the
- * internal {@link deadline} code and on nothing model-facing. Scoping
- * {@link timeoutOf} to it keeps a nested outer deadline from being misread as
- * this plugin's own expiry.
+ * Deadline classification code owned by this plugin. Scoping {@link timeoutOf}
+ * to it keeps a nested outer deadline from being misread as this plugin's own
+ * expiry.
  */
 export declare const PLAN_REVIEW_TIMEOUT = "PLAN_REVIEW_TIMEOUT";
 /** Cordis plugin name used by loader diagnostics. */
 export declare const name = "plan-review-timeout";
-declare module '@deepseek-ai/cordis' {
-    interface Context {
-        /** Configurable `exit_plan_mode` plan-review timeout, shared by the settings card and the enforcement wrapper. */
-        planReviewTimeout: PlanReviewTimeoutController;
-    }
-}
+/** The Cordis services this plugin reads. */
+export declare const inject: string[];
 /** Validated Loader configuration of this plugin. */
 export interface Config {
     /** Plan-review wait in milliseconds before an unanswered review is dismissed. */
     timeoutMs: number;
 }
 export declare const Config: z<Config>;
+/** Register the settings service and the plan-review deadline wrapper. */
+export declare function apply(ctx: Context, config: Config): void;
+declare module '@deepseek-ai/cordis' {
+    interface Context {
+        /** Configurable `exit_plan_mode` plan-review timeout, shared by the settings card and the enforcement wrapper. */
+        planReviewTimeout: PlanReviewTimeoutController;
+    }
+}
 /**
  * Bound the plan-review wait and serve the settings card's read and write
  * operations on this plugin's own configuration row.
  */
-export default class PlanReviewTimeoutController extends TypertRemoteService {
+export declare class PlanReviewTimeoutController extends TypertRemoteService {
     private readonly config;
-    static inject: string[];
-    static Config: z<Config>;
     constructor(ctx: Context, config: Config);
     /**
      * Read the effective plan-review timeout.

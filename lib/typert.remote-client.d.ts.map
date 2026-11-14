@@ -1,1 +1,1 @@
-{"version":3,"file":"typert.remote-client.d.ts","names":["get","set"],"sources":["../src/index.ts"],"sourcesContent":[null],"mappings":";;;;;;;;;;IAqGEA,G;IAyBMC,G;;;IAzBND,uB;IAyBMC,uB","ignoreList":[]}
+{"version":3,"file":"typert.remote-client.d.ts","names":["get","set"],"sources":["../src/index.ts"],"sourcesContent":[null],"mappings":";;;;;;;;;;IAkIEA,G;IAyBMC,G;;;IAzBND,uB;IAyBMC,uB","ignoreList":[]}
