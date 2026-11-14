@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { afterEach, describe, it } from 'node:test'
 import { Context } from '@deepseek-ai/cordis'
 import PlanReviewTimeoutController from '../lib/index.js'
@@ -206,3 +208,30 @@ describe('Plan-review deadline wrapper', () => {
 function ctx_dispatch(b, exec, next) {
   return b.ctx.waterfall('tools/execute', exec, next)
 }
+
+describe('typert-protocol cordis-root patch', () => {
+  it('resolves the installed dependency through the symbol root key, not ctx.root', () => {
+    const require = createRequire(import.meta.url)
+    const source = readFileSync(require.resolve('@deepseek-ai/dsh-typert-protocol'), 'utf8')
+    assert.ok(source.includes('Symbol.for("cordis.root")') || source.includes("Symbol.for('cordis.root')"),
+      'installed dsh-typert-protocol lost the cordis-root patch; re-run pnpm install')
+    assert.ok(!source.includes('ctx.root.reflect'),
+      'installed dsh-typert-protocol dereferences ctx.root again; re-run pnpm install')
+  })
+
+  it('registers the invocation accessor through the symbol root key when one is present', () => {
+    const ctx = new Context()
+    contexts.push(ctx)
+    ctx.provide('configEditor', { entries: () => [], configuration: () => [] })
+    ctx.provide('tools', { register: () => () => {} })
+    const registered = []
+    const symbolRoot = {
+      reflect: { props: {} },
+      accessor: (name) => { registered.push(name) },
+    }
+    Object.defineProperty(ctx, Symbol.for('cordis.root'), { value: symbolRoot, configurable: true })
+    const controller = new PlanReviewTimeoutController(ctx, { timeoutMs: 120000 })
+    assert.ok(controller instanceof PlanReviewTimeoutController)
+    assert.deepEqual(registered, ['invocation'])
+  })
+})

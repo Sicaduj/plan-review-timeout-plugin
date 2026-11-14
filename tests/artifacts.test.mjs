@@ -11,9 +11,13 @@ const host = read('lib/index.js')
 const hostRemote = read('lib/typert.host.js')
 
 describe('standalone bundle artifacts', () => {
-  it('declares the private package, real bundle patch, display resources, and built exports', () => {
+  it('declares the market-eligible package, real bundle patch, display resources, and built exports', () => {
     assert.equal(manifest.name, '@deepseek-ai/dsh-experimental-plan-review-timeout')
-    assert.equal(manifest.private, true)
+    assert.notEqual(manifest.private, true)
+    assert.equal(manifest.engines.dsh, '*')
+    assert.equal(manifest.repository.url, 'git+https://github.com/Sicaduj/plan-review-timeout-plugin.git')
+    assert.ok(manifest.homepage.startsWith('https://'))
+    assert.ok(manifest.keywords.includes('exit-plan-mode'))
     assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
     assert.equal(manifest.dsh.client.platform, 'web')
     assert.equal(manifest.exports['./icon'], './icon.svg')
@@ -27,6 +31,13 @@ describe('standalone bundle artifacts', () => {
       assert.ok(metadata.meta.title.length > 0)
       assert.ok(metadata.meta.description.length > 0)
     }
+  })
+
+  it('keeps the cordis-root dependency patch wired through pnpm', () => {
+    assert.ok(statSync(join(root, 'patches', '@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch')).isFile())
+    const workspace = read('pnpm-workspace.yaml')
+    assert.ok(workspace.includes('patchedDependencies'))
+    assert.ok(workspace.includes('patches/@deepseek-ai__dsh-typert-protocol@0.2.2-alpha.2.patch'))
   })
 
   it('inserts only the intended Host+Client package row with its default timeout', () => {

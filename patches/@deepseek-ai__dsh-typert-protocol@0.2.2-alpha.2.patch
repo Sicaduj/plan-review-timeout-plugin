@@ -1,0 +1,33 @@
+diff --git a/lib/index.js b/lib/index.js
+index 9edc8744d2819d69ffbce79c6fdd5e475cbc4169..ad5f8feab695cad5cc8cf5240da110ee6faac211 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -357,8 +357,9 @@ var TypertRemoteService = class extends Service {
+ * tree registers it on the root, where it outlives any one Service.
+ */
+ function provideInvocationAccessor(ctx) {
+-	if (Object.hasOwn(ctx.root.reflect.props, "invocation")) return;
+-	ctx.root.accessor("invocation", { get: () => void 0 });
++	const root = ctx[Symbol.for("cordis.root")] ?? ctx.root;
++	if (Object.hasOwn(root.reflect.props, "invocation")) return;
++	root.accessor("invocation", { get: () => void 0 });
+ }
+ function Remote(methodExportOrOptions, context) {
+ 	if (typeof methodExportOrOptions === "string") {
+diff --git a/lib/types/index.js b/lib/types/index.js
+index eff6fbf32902dfcdb763a14ca0819296130af823..15794a0cc1927fb8b1b86a2e34da19f34b46e3e0 100644
+--- a/lib/types/index.js
++++ b/lib/types/index.js
+@@ -61,9 +61,10 @@ export class TypertRemoteService extends Service {
+  * tree registers it on the root, where it outlives any one Service.
+  */
+ function provideInvocationAccessor(ctx) {
+-    if (Object.hasOwn(ctx.root.reflect.props, 'invocation'))
++    const root = ctx[Symbol.for('cordis.root')] ?? ctx.root;
++    if (Object.hasOwn(root.reflect.props, 'invocation'))
+         return;
+-    ctx.root.accessor('invocation', { get: () => undefined });
++    root.accessor('invocation', { get: () => undefined });
+ }
+ export function Remote(methodExportOrOptions, context) {
+     if (typeof methodExportOrOptions === 'string') {

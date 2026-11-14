@@ -41,6 +41,24 @@ pnpm test
 
 No installation, profile edit, or runtime configuration change is performed by these commands. Installation and live browser verification are separate integration steps performed by the integrator.
 
+## Install through Discover (plugin market)
+
+The package declares `dsh.bundle`, is not private, and accepts every DSH version through `engines.dsh: "*"`, so the DSH plugin market generator (`@deepseek-ai/dsh-plugin-market-generator`) lists its Git source in a market index:
+
+1. Tag releases as `vX.Y.Z` (a `v1.0.0` tag lists version 1.0.0); the default-branch commit lists the manifest's current version too.
+2. Generate an index from a source list containing this repository URL with `@deepseek-ai/dsh-plugin-market-generator`, and publish the `index.json` over https.
+3. Add that index URL as an index source in DSH's Discover page; the entry installs the bundle from the pinned Git commit through guided plugin installation.
+
+The index and detail reads use the reader's Git credential configuration for this private repository, so installation and long-description pages need a machine that can already clone it.
+
+The published market index for this bundle is a secret GitHub gist (unlisted, fetched without credentials):
+
+```text
+https://gist.githubusercontent.com/Sicaduj/ab306b08059ad421d74270f7dece403d/raw/index.json
+```
+
+To publish a new version: tag `vX.Y.Z`, push the tag, re-run the market generator over `plugins.txt` containing this repository URL, and replace the gist's `index.json` with `gh gist edit ab306b08059ad421d74270f7dece403d index.json`. The Discover index source URL stays the same.
+
 Two build-environment notes:
 
 - `pnpm-workspace.yaml` pins `rolldown` to `1.1.1`, the version the checkout's own toolchain resolves for tsdown.
@@ -55,3 +73,4 @@ No model-visible surface is added: no tool, no prompt section. The only model-vi
 - The plugin targets a profile whose Loader entries are reachable through `configEditor` and that runs plan mode (`@deepseek-ai/dsh-plan-mode`); without plan mode there is no `exit_plan_mode` call to bound.
 - The configured duration bounds each review from the moment the tool call blocks; it cannot extend a review that another deadline in the deployment already cancelled earlier.
 - A timeout concludes the turn as a dismissal; a future revision could instead surface a "plan review expired" transcript row so the user can resume with one click.
+- Published `@deepseek-ai/dsh-typert-protocol` (through 0.2.2-rc.3) resolves the Cordis root as the string property `ctx.root`, which checkout-based DSH builds replaced with the `Symbol.for('cordis.root')` key; without a fix, constructing this plugin's Remote service throws `cannot get property "root" without inject` on those hosts. `pnpm-workspace.yaml` carries a `patchedDependencies` entry (`patches/`) that resolves the root through the symbol key with a `ctx.root` fallback for hosts that still expose it, and the test suite fails if a reinstall drops the patch. The patch is redundant once a published `dsh-typert-protocol` ships the symbol access; remove it then.
